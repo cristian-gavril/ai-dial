@@ -1,0 +1,6 @@
+apiVersion: v2
+name: dial-chat
+description: A sub-chart for deploying the DIAL Chat UI component.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

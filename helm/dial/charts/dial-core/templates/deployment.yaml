@@ -1,0 +1,106 @@
+{{- if .Values.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dial-core.fullname" . }}
+  labels:
+    {{- include "dial-core.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "dial-core.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "dial-core.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "dial-core.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: AIDIAL_SETTINGS
+              value: "/opt/settings/settings.json"
+            - name: JAVA_OPTS
+              value: "-Dgflog.config=/opt/settings/gflog.xml"
+            - name: LOG_DIR
+              value: "/app/log"
+            - name: STORAGE_DIR
+              value: "/app/data"
+            - name: aidial_config_files
+              value: '["/opt/config/config.json"]'
+            - name: aidial_storage_overrides
+              value: '{ "jclouds.filesystem.basedir": "/app/data" }'
+            - name: aidial_redis_singleServerConfig_address
+              value: {{ .Values.redis.address | quote }}
+            - name: DIAL_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "dial-core.fullname" . }}-secret
+                  key: encryption_key
+            - name: DIAL_ENCRYPTION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "dial-core.fullname" . }}-secret
+                  key: encryption_secret
+          volumeMounts:
+            - name: config-settings
+              mountPath: /opt/settings
+            - name: config-application
+              mountPath: /opt/config
+            - name: data
+              mountPath: /app/data
+              subPath: "data"
+            - name: logs
+              mountPath: /app/log
+              subPath: "log"
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: config-settings
+          configMap:
+            name: {{ include "dial-core.fullname" . }}-config
+            items:
+              - key: settings.json
+                path: settings.json
+              - key: gflog.xml
+                path: gflog.xml
+        - name: config-application
+          configMap:
+            name: {{ include "dial-core.fullname" . }}-config
+            items:
+              - key: config.json
+                path: config.json
+        - name: data
+          {{- if .Values.persistence.data.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "dial-core.fullname" . }}-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: logs
+          {{- if .Values.persistence.logs.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "dial-core.fullname" . }}-logs
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end -}}

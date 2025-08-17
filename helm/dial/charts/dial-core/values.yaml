@@ -1,0 +1,115 @@
+# Default values for dial-core.
+replicaCount: 1
+
+image:
+  repository: epam/ai-dial-core
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart's appVersion.
+  tag: "0.25.1"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources: {}
+
+persistence:
+  data:
+    enabled: true
+    size: 1Gi
+    # storageClass: ""
+  logs:
+    enabled: true
+    size: 1Gi
+    # storageClass: ""
+
+# Configuration for the dial-core application.
+# These will be stored in ConfigMaps and mounted into the pod.
+config:
+  settings: |
+    {
+      "server": {
+        "port": 8080
+      },
+      "identityProviders": {
+        "test": {
+          "rolePath": "roles",
+          "disableJwtVerification": true
+        }
+      }
+    }
+  gflog: |
+    <config>
+        <appender name="console" factory="com.epam.deltix.gflog.core.appender.ConsoleAppenderFactory"/>
+        <appender name="file" factory="com.epam.deltix.gflog.core.appender.DailyRollingFileAppenderFactory" bufferCapacity="32m" file="/app/log/aidial.log" maxFiles="10" maxFileSize="1g">
+            <layout template="%m%n"/>
+        </appender>
+        <logger level="INFO">
+            <appender-ref ref="console"/>
+        </logger>
+        <logger level="INFO" name="aidial.log">
+            <appender-ref ref="file"/>
+        </logger>
+        <service entryEncoding="UTF-8" entryMaxCapacity="30m" bufferCapacity="128m"/>
+    </config>
+  application: |
+    {
+      "routes": {},
+      "models": {
+        "gpt-35-turbo": {
+          "type": "chat",
+          "displayName": "GPT-3.5",
+          "endpoint": "http://{{ .Release.Name }}-dial-adapter-openai:5000/openai/deployments/gpt-35-turbo/chat/completions",
+          "iconUrl": "http://{{ .Release.Name }}-themes:8080/gpt3.svg"
+        },
+        "gpt-4": {
+          "type": "chat",
+          "displayName": "GPT-4",
+          "endpoint": "http://{{ .Release.Name }}-dial-adapter-openai:5000/openai/deployments/gpt-4/chat/completions",
+          "iconUrl": "http://{{ .Release.Name }}-themes:8080/gpt4.svg"
+        }
+      },
+      "keys": {
+        "dial_api_key": {
+          "project": "TEST-PROJECT",
+          "role": "default"
+        }
+      },
+      "roles": {
+        "default": {
+          "limits": {
+            "gpt-35-turbo": {},
+            "gpt-4": {}
+          }
+        }
+      }
+    }
+
+# Sensitive values that will be stored in a Kubernetes Secret.
+secrets:
+  encryption:
+    # It is strongly recommended to override these values during installation.
+    # Use Helm's --set or --set-string flags.
+    # Example: --set dial-core.secrets.encryption.key=$(openssl rand -base64 32)
+    key: "changeme-in-production"
+    secret: "changeme-in-production"
+
+# Configuration for external dependencies.
+redis:
+  # The address of the Redis service. This is templated to connect to the redis sub-chart by default.
+  address: "redis://{{ .Release.Name }}-redis:6379"

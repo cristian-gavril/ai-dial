@@ -1,0 +1,34 @@
+# Global values that are passed to all sub-charts.
+global:
+  # The Docker registry to pull images from.
+  # registry: ""
+
+  # Global image pull secrets.
+  # imagePullSecrets: []
+
+  # The storage class to use for persistent volumes.
+  # storageClass: "standard"
+
+# Configuration for the DIAL Core sub-chart.
+dial-core:
+  enabled: true
+
+# Configuration for the DIAL Chat sub-chart.
+dial-chat:
+  enabled: true
+
+# Configuration for the OpenAI Adapter sub-chart.
+dial-adapter-openai:
+  enabled: true
+  # You can add more adapters here and control them.
+  # For example:
+  # dial-adapter-bedrock:
+  #   enabled: false
+  # dial-adapter-vertexai:
+  #   enabled: false
+
+# Configuration for Redis, which is a dependency for the persistent layer.
+redis:
+  enabled: true
+  # For production, it's recommended to use an external, managed Redis instance.
+  # To do so, set enabled: false and configure DIAL Core to connect to your external Redis.

@@ -1,0 +1,36 @@
+# Default values for redis.
+enabled: true
+
+replicaCount: 1
+
+image:
+  repository: redis
+  pullPolicy: IfNotPresent
+  tag: "7.2.4-alpine3.19"
+
+command:
+  - "redis-server"
+  - "--maxmemory 2000mb"
+  - "--maxmemory-policy volatile-lfu"
+  - "--save \"\""
+  - "--appendonly no"
+  - "--loglevel warning"
+
+service:
+  type: ClusterIP
+  port: 6379
+
+# Standard values
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+resources:
+  limits:
+    memory: "2200M"

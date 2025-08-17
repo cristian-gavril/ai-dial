@@ -1,0 +1,643 @@
+---
+# Source: dial/charts/dial-adapter-openai/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-release-dial-adapter-openai
+  labels:
+    helm.sh/chart: dial-adapter-openai-0.1.0
+    app.kubernetes.io/name: dial-adapter-openai
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: adapter-openai
+---
+# Source: dial/charts/dial-chat/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-release-dial-chat
+  labels:
+    helm.sh/chart: dial-chat-0.1.0
+    app.kubernetes.io/name: dial-chat
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: chat
+---
+# Source: dial/charts/dial-core/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-release-dial-core
+  labels:
+    helm.sh/chart: dial-core-0.1.0
+    app.kubernetes.io/name: dial-core
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: core
+---
+# Source: dial/charts/redis/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-release-redis
+  labels:
+    helm.sh/chart: redis-0.1.0
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "7.x"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: redis
+---
+# Source: dial/charts/themes/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-release-themes
+  labels:
+    helm.sh/chart: themes-0.1.0
+    app.kubernetes.io/name: themes
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "0.9.1"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: themes
+---
+# Source: dial/charts/dial-chat/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-release-dial-chat-secret
+  labels:
+    helm.sh/chart: dial-chat-0.1.0
+    app.kubernetes.io/name: dial-chat
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: chat
+type: Opaque
+data:
+  NEXTAUTH_SECRET: "Y2hhbmdlbWUtaW4tcHJvZHVjdGlvbg=="
+  DIAL_API_KEY: "ZGlhbF9hcGlfa2V5"
+---
+# Source: dial/charts/dial-core/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-release-dial-core-secret
+  labels:
+    helm.sh/chart: dial-core-0.1.0
+    app.kubernetes.io/name: dial-core
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: core
+type: Opaque
+data:
+  # The values are Base64 encoded by Helm's `b64enc` function.
+  encryption_key: "Y2hhbmdlbWUtaW4tcHJvZHVjdGlvbg=="
+  encryption_secret: "Y2hhbmdlbWUtaW4tcHJvZHVjdGlvbg=="
+---
+# Source: dial/charts/dial-chat/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-release-dial-chat-config
+  labels:
+    helm.sh/chart: dial-chat-0.1.0
+    app.kubernetes.io/name: dial-chat
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: chat
+data:
+  ENABLED_FEATURES: "conversations-section,prompts-section,top-settings,top-clear-conversation,top-chat-info,top-chat-model-settings,empty-chat-settings,header,footer,request-api-key,report-an-issue,likes,conversations-sharing,input-files,attachments-manager,prompts-sharing,prompts-publishing,conversations-publishing,custom-logo,input-links,custom-applications,message-templates,marketplace,quick-apps,code-apps,applications-sharing,marketplace-table-view"
+  KEEP_ALIVE_TIMEOUT: "20000"
+  DIAL_API_HOST: "http://my-release-dial-core:8080"
+  THEMES_CONFIG_HOST: "http://my-release-themes:8080"
+---
+# Source: dial/charts/dial-core/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-release-dial-core-config
+  labels:
+    helm.sh/chart: dial-core-0.1.0
+    app.kubernetes.io/name: dial-core
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: core
+data:
+  settings.json: |-
+    {
+      "server": {
+        "port": 8080
+      },
+      "identityProviders": {
+        "test": {
+          "rolePath": "roles",
+          "disableJwtVerification": true
+        }
+      }
+    }
+
+  gflog.xml: |-
+    <config>
+        <appender name="console" factory="com.epam.deltix.gflog.core.appender.ConsoleAppenderFactory"/>
+        <appender name="file" factory="com.epam.deltix.gflog.core.appender.DailyRollingFileAppenderFactory" bufferCapacity="32m" file="/app/log/aidial.log" maxFiles="10" maxFileSize="1g">
+            <layout template="%m%n"/>
+        </appender>
+        <logger level="INFO">
+            <appender-ref ref="console"/>
+        </logger>
+        <logger level="INFO" name="aidial.log">
+            <appender-ref ref="file"/>
+        </logger>
+        <service entryEncoding="UTF-8" entryMaxCapacity="30m" bufferCapacity="128m"/>
+    </config>
+
+  config.json: |-
+    {
+      "routes": {},
+      "models": {
+        "gpt-35-turbo": {
+          "type": "chat",
+          "displayName": "GPT-3.5",
+          "endpoint": "http://my-release-dial-adapter-openai:5000/openai/deployments/gpt-35-turbo/chat/completions",
+          "iconUrl": "http://my-release-themes:8080/gpt3.svg"
+        },
+        "gpt-4": {
+          "type": "chat",
+          "displayName": "GPT-4",
+          "endpoint": "http://my-release-dial-adapter-openai:5000/openai/deployments/gpt-4/chat/completions",
+          "iconUrl": "http://my-release-themes:8080/gpt4.svg"
+        }
+      },
+      "keys": {
+        "dial_api_key": {
+          "project": "TEST-PROJECT",
+          "role": "default"
+        }
+      },
+      "roles": {
+        "default": {
+          "limits": {
+            "gpt-35-turbo": {},
+            "gpt-4": {}
+          }
+        }
+      }
+    }
+---
+# Source: dial/charts/dial-core/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-release-dial-core-data
+  labels:
+    helm.sh/chart: dial-core-0.1.0
+    app.kubernetes.io/name: dial-core
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: core
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Source: dial/charts/dial-core/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-release-dial-core-logs
+  labels:
+    helm.sh/chart: dial-core-0.1.0
+    app.kubernetes.io/name: dial-core
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: core
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Source: dial/charts/dial-adapter-openai/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-release-dial-adapter-openai
+  labels:
+    helm.sh/chart: dial-adapter-openai-0.1.0
+    app.kubernetes.io/name: dial-adapter-openai
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: adapter-openai
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: dial-adapter-openai
+    app.kubernetes.io/instance: my-release
+---
+# Source: dial/charts/dial-chat/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-release-dial-chat
+  labels:
+    helm.sh/chart: dial-chat-0.1.0
+    app.kubernetes.io/name: dial-chat
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: chat
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: dial-chat
+    app.kubernetes.io/instance: my-release
+---
+# Source: dial/charts/dial-core/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-release-dial-core
+  labels:
+    helm.sh/chart: dial-core-0.1.0
+    app.kubernetes.io/name: dial-core
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: core
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: dial-core
+    app.kubernetes.io/instance: my-release
+---
+# Source: dial/charts/redis/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-release-redis
+  labels:
+    helm.sh/chart: redis-0.1.0
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "7.x"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: redis
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: redis
+      protocol: TCP
+      name: redis
+  selector:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: my-release
+---
+# Source: dial/charts/themes/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-release-themes
+  labels:
+    helm.sh/chart: themes-0.1.0
+    app.kubernetes.io/name: themes
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "0.9.1"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: themes
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: themes
+    app.kubernetes.io/instance: my-release
+---
+# Source: dial/charts/dial-adapter-openai/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-release-dial-adapter-openai
+  labels:
+    helm.sh/chart: dial-adapter-openai-0.1.0
+    app.kubernetes.io/name: dial-adapter-openai
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: adapter-openai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dial-adapter-openai
+      app.kubernetes.io/instance: my-release
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dial-adapter-openai
+        app.kubernetes.io/instance: my-release
+    spec:
+      serviceAccountName: my-release-dial-adapter-openai
+      securityContext:
+        {}
+      containers:
+        - name: dial-adapter-openai
+          securityContext:
+            {}
+          image: "epam/ai-dial-adapter-openai:0.22.0"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: WEB_CONCURRENCY
+              value: "3"
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          resources:
+            {}
+---
+# Source: dial/charts/dial-chat/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-release-dial-chat
+  labels:
+    helm.sh/chart: dial-chat-0.1.0
+    app.kubernetes.io/name: dial-chat
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: chat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dial-chat
+      app.kubernetes.io/instance: my-release
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dial-chat
+        app.kubernetes.io/instance: my-release
+    spec:
+      serviceAccountName: my-release-dial-chat
+      securityContext:
+        {}
+      containers:
+        - name: dial-chat
+          securityContext:
+            {}
+          image: "epam/ai-dial-chat:0.26.0"
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: my-release-dial-chat-config
+            - secretRef:
+                name: my-release-dial-chat-secret
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          resources:
+            {}
+---
+# Source: dial/charts/dial-core/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-release-dial-core
+  labels:
+    helm.sh/chart: dial-core-0.1.0
+    app.kubernetes.io/name: dial-core
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: core
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: dial-core
+      app.kubernetes.io/instance: my-release
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: dial-core
+        app.kubernetes.io/instance: my-release
+    spec:
+      serviceAccountName: my-release-dial-core
+      securityContext:
+        {}
+      containers:
+        - name: dial-core
+          securityContext:
+            {}
+          image: "epam/ai-dial-core:0.25.1"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: AIDIAL_SETTINGS
+              value: "/opt/settings/settings.json"
+            - name: JAVA_OPTS
+              value: "-Dgflog.config=/opt/settings/gflog.xml"
+            - name: LOG_DIR
+              value: "/app/log"
+            - name: STORAGE_DIR
+              value: "/app/data"
+            - name: aidial_config_files
+              value: '["/opt/config/config.json"]'
+            - name: aidial_storage_overrides
+              value: '{ "jclouds.filesystem.basedir": "/app/data" }'
+            - name: aidial_redis_singleServerConfig_address
+              value: "redis://{{ .Release.Name }}-redis:6379"
+            - name: DIAL_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: my-release-dial-core-secret
+                  key: encryption_key
+            - name: DIAL_ENCRYPTION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: my-release-dial-core-secret
+                  key: encryption_secret
+          volumeMounts:
+            - name: config-settings
+              mountPath: /opt/settings
+            - name: config-application
+              mountPath: /opt/config
+            - name: data
+              mountPath: /app/data
+              subPath: "data"
+            - name: logs
+              mountPath: /app/log
+              subPath: "log"
+          resources:
+            {}
+      volumes:
+        - name: config-settings
+          configMap:
+            name: my-release-dial-core-config
+            items:
+              - key: settings.json
+                path: settings.json
+              - key: gflog.xml
+                path: gflog.xml
+        - name: config-application
+          configMap:
+            name: my-release-dial-core-config
+            items:
+              - key: config.json
+                path: config.json
+        - name: data
+          persistentVolumeClaim:
+            claimName: my-release-dial-core-data
+        - name: logs
+          persistentVolumeClaim:
+            claimName: my-release-dial-core-logs
+---
+# Source: dial/charts/redis/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-release-redis
+  labels:
+    helm.sh/chart: redis-0.1.0
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "7.x"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: my-release
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: redis
+        app.kubernetes.io/instance: my-release
+    spec:
+      serviceAccountName: my-release-redis
+      securityContext:
+        {}
+      containers:
+        - name: redis
+          securityContext:
+            {}
+          image: "redis:7.2.4-alpine3.19"
+          imagePullPolicy: IfNotPresent
+          command:
+            - redis-server
+            - --maxmemory 2000mb
+            - --maxmemory-policy volatile-lfu
+            - --save ""
+            - --appendonly no
+            - --loglevel warning
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+          resources:
+            limits:
+              memory: 2200M
+---
+# Source: dial/charts/themes/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-release-themes
+  labels:
+    helm.sh/chart: themes-0.1.0
+    app.kubernetes.io/name: themes
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "0.9.1"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: themes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: themes
+      app.kubernetes.io/instance: my-release
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: themes
+        app.kubernetes.io/instance: my-release
+    spec:
+      serviceAccountName: my-release-themes
+      securityContext:
+        {}
+      containers:
+        - name: themes
+          securityContext:
+            {}
+          image: "epam/ai-dial-chat-themes:0.9.1"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            {}
+---
+# Source: dial/charts/dial-chat/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-release-dial-chat
+  labels:
+    helm.sh/chart: dial-chat-0.1.0
+    app.kubernetes.io/name: dial-chat
+    app.kubernetes.io/instance: my-release
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: chat
+spec:
+  rules:
+    - host: "dial.local"
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: my-release-dial-chat
+                port:
+                  name: http

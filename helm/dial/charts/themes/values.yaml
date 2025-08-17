@@ -1,0 +1,26 @@
+# Default values for themes.
+enabled: true
+
+replicaCount: 1
+
+image:
+  repository: epam/ai-dial-chat-themes
+  pullPolicy: IfNotPresent
+  tag: "0.9.1"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+# Standard values
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+resources: {}

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: redis
+description: A sub-chart for deploying a Redis instance for DIAL. For production, consider using an external chart or managed service.
+type: application
+version: 0.1.0
+appVersion: "7.x"

@@ -1,0 +1,18 @@
+dependencies:
+- name: dial-core
+  repository: file://./charts/dial-core
+  version: 0.1.0
+- name: dial-chat
+  repository: file://./charts/dial-chat
+  version: 0.1.0
+- name: dial-adapter-openai
+  repository: file://./charts/dial-adapter-openai
+  version: 0.1.0
+- name: themes
+  repository: file://./charts/themes
+  version: 0.1.0
+- name: redis
+  repository: file://./charts/redis
+  version: 0.1.0
+digest: sha256:2223d26ee916d9436ae972b8ac5bbc0f5a7c99fcb3a78cc527727bf01739b5bd
+generated: "2025-08-17T19:59:54.465309676Z"

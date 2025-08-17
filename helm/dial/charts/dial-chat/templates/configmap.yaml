@@ -1,0 +1,13 @@
+{{- if .Values.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dial-chat.fullname" . }}-config
+  labels:
+    {{- include "dial-chat.labels" . | nindent 4 }}
+data:
+  ENABLED_FEATURES: {{ .Values.config.enabledFeatures | quote }}
+  KEEP_ALIVE_TIMEOUT: {{ .Values.config.keepAliveTimeout | quote }}
+  DIAL_API_HOST: {{ tpl .Values.config.dialApiHost . | quote }}
+  THEMES_CONFIG_HOST: {{ tpl .Values.config.themesConfigHost . | quote }}
+{{- end -}}

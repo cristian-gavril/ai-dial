@@ -1,0 +1,58 @@
+# Default values for dial-chat.
+replicaCount: 1
+
+image:
+  repository: epam/ai-dial-chat
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart's appVersion.
+  tag: "0.26.0"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: dial.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+
+# Non-sensitive configuration values that will be placed in a ConfigMap.
+config:
+  enabledFeatures: "conversations-section,prompts-section,top-settings,top-clear-conversation,top-chat-info,top-chat-model-settings,empty-chat-settings,header,footer,request-api-key,report-an-issue,likes,conversations-sharing,input-files,attachments-manager,prompts-sharing,prompts-publishing,conversations-publishing,custom-logo,input-links,custom-applications,message-templates,marketplace,quick-apps,code-apps,applications-sharing,marketplace-table-view"
+  keepAliveTimeout: "20000"
+  # The hosts for the backend services. These are templated to work within the Helm release.
+  dialApiHost: "http://{{ .Release.Name }}-dial-core:8080"
+  # Note: The 'themes' service is not yet defined in a sub-chart, but we are preparing for it.
+  themesConfigHost: "http://{{ .Release.Name }}-themes:8080"
+
+# Sensitive values that will be stored in a Kubernetes Secret.
+secrets:
+  # It is strongly recommended to override these values during installation.
+  nextAuthSecret: "changeme-in-production"
+  dialApiKey: "dial_api_key" # This is the default from docker-compose, should be changed for production.

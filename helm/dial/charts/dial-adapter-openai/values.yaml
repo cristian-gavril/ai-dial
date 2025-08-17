@@ -1,0 +1,36 @@
+# Default values for dial-adapter-openai.
+replicaCount: 1
+
+image:
+  repository: epam/ai-dial-adapter-openai
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart's appVersion.
+  tag: "0.22.0"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 5000
+
+# Configuration for the adapter, which will be set as environment variables.
+config:
+  webConcurrency: "3"
+
+# For a real deployment, you would pass the upstream OpenAI API key
+# via a secret. This chart can be extended to support that.
+# secrets:
+#   apiKey: ""
+
+resources: {}

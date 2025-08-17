@@ -1,0 +1,41 @@
+apiVersion: v2
+name: dial
+description: A Helm chart for deploying the complete DIAL platform stack.
+type: application
+version: 0.1.0
+appVersion: "1.0.0" # This should be updated to match the DIAL application version.
+maintainers:
+  - name: AI-DIAL team
+    email: ai-dial@epam.com
+keywords:
+  - ai
+  - llm
+  - generative-ai
+  - dial
+home: https://github.com/epam/ai-dial
+icon: https://github.com/epam/ai-dial/blob/main/static/img/logo-dk.svg
+sources:
+  - https://github.com/epam/ai-dial-helm
+  - https://github.com/epam/ai-dial-core
+  - https://github.com/epam/ai-dial-chat
+dependencies:
+  - name: dial-core
+    version: "0.1.0"
+    repository: "file://./charts/dial-core"
+    condition: dial-core.enabled
+  - name: dial-chat
+    version: "0.1.0"
+    repository: "file://./charts/dial-chat"
+    condition: dial-chat.enabled
+  - name: dial-adapter-openai
+    version: "0.1.0"
+    repository: "file://./charts/dial-adapter-openai"
+    condition: dial-adapter-openai.enabled
+  - name: themes
+    version: "0.1.0"
+    repository: "file://./charts/themes"
+    condition: themes.enabled
+  - name: redis
+    version: "0.1.0"
+    repository: "file://./charts/redis"
+    condition: redis.enabled
